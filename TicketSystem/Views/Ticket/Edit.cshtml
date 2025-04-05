@@ -1,0 +1,100 @@
+﻿@* CAMBIO: Modelo ahora es TicketEditViewModel *@
+@model TicketSystem.ViewModels.TicketEditViewModel
+@using TicketSystem.Models; // Para las enumeraciones
+
+@{
+    ViewData["Title"] = "Editar Ticket #" + Model.TicketId;
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<h4>Modificar información del Ticket</h4>
+<hr />
+<div class="row">
+    <div class="col-md-8">
+        @* El formulario envía a la acción Edit (POST) que ahora espera TicketEditViewModel *@
+        <form asp-action="Edit" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            @* Campo oculto para enviar el TicketId (viene del ViewModel) *@
+            <input type="hidden" asp-for="TicketId" />
+
+            <div class="mb-3">
+                <label asp-for="Subject" class="form-label"></label>
+                <input asp-for="Subject" class="form-control" />
+                <span asp-validation-for="Subject" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label"></label>
+                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="CategoryId" class="form-label"></label>
+                @* Usa el ViewBag poblado por PopulateDropdownsFromServiceAsync *@
+                <select asp-for="CategoryId" class="form-select" asp-items="ViewBag.CategoryId">
+                    <option value="">-- Seleccione Categoría --</option>
+                </select>
+                <span asp-validation-for="CategoryId" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="AssignedToUserId" class="form-label"></label>
+                @* Usa el ViewBag poblado por PopulateDropdownsFromServiceAsync *@
+                <select asp-for="AssignedToUserId" class="form-select" asp-items="ViewBag.AssignedToUserId">
+                    <option value="">-- Seleccione Analista (Opcional) --</option>
+                </select>
+                <span asp-validation-for="AssignedToUserId" class="text-danger"></span>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label asp-for="Urgency" class="form-label"></label>
+                    <select asp-for="Urgency" class="form-select" asp-items="Html.GetEnumSelectList<TicketUrgency>()"></select>
+                    <span asp-validation-for="Urgency" class="text-danger"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Importance" class="form-label"></label>
+                    <select asp-for="Importance" class="form-select" asp-items="Html.GetEnumSelectList<TicketImportance>()"></select>
+                    <span asp-validation-for="Importance" class="text-danger"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Status" class="form-label"></label>
+                    <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<TicketStatus>()"></select>
+                    <span asp-validation-for="Status" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label asp-for="SolutionDocumentation" class="form-label"></label>
+                <textarea asp-for="SolutionDocumentation" class="form-control" rows="5"></textarea>
+                <span asp-validation-for="SolutionDocumentation" class="text-danger"></span>
+            </div>
+
+            @* Mostrar info no editable si se desea (opcional) *@
+            <div class="mb-3">
+                <label asp-for="CreatedByUserEmail" class="form-label"></label>
+                <input asp-for="CreatedByUserEmail" class="form-control" readonly disabled />
+            </div>
+            <div class="mb-3">
+                <label asp-for="CreatedAt" class="form-label"></label>
+                <input asp-for="CreatedAt" class="form-control" readonly disabled type="text" value="@Model.CreatedAt.ToString("g")" />
+            </div>
+
+
+            <div class="form-group mt-4">
+                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                @* El enlace Cancelar ahora usa el TicketId del ViewModel *@
+                <a asp-action="Details" asp-route-id="@Model.TicketId" class="btn btn-secondary ms-2">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Volver a la Lista</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,0 +1,85 @@
+﻿@model TicketSystem.ViewModels.TicketDetailsViewModel
+@using TicketSystem.Models // Para Enum TicketStatus
+
+@{
+    // Acceder via Model.Ticket porque el ViewModel contiene una propiedad Ticket de tipo TicketDto
+    ViewData["Title"] = "Detalles del Ticket #" + Model.Ticket.TicketId;
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@* Mostrar mensajes de éxito/error de TempData *@
+@if (TempData["SuccessMessage"] != null) { <div class="alert alert-success alert-dismissible fade show" role="alert">@TempData["SuccessMessage"]<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div> }
+@if (TempData["ErrorMessage"] != null) { <div class="alert alert-danger alert-dismissible fade show" role="alert">@TempData["ErrorMessage"]<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div> }
+
+
+<div>
+    <h4>Información Completa del Ticket</h4>
+    <hr />
+    <dl class="row">
+        @* Acceder a propiedades via Model.Ticket.*@
+        <dt class="col-sm-3">ID Ticket</dt>
+        <dd class="col-sm-9">@Model.Ticket.TicketId</dd>
+
+        <dt class="col-sm-3">Asunto</dt>
+        <dd class="col-sm-9">@Model.Ticket.Subject</dd>
+
+        <dt class="col-sm-3">Descripción</dt>
+        <dd class="col-sm-9">
+             @if (!string.IsNullOrEmpty(Model.Ticket.Description)) { <pre style="white-space: pre-wrap; font-family: inherit; margin: 0;">@Model.Ticket.Description</pre> } else { <span>--</span> }
+        </dd>
+
+        <dt class="col-sm-3">Categoría</dt>
+        <dd class="col-sm-9">@Model.Ticket.CategoryName</dd>
+
+        <dt class="col-sm-3">Estado</dt>
+        <dd class="col-sm-9"><span class="badge @GetStatusBadgeClassFromString(Model.Ticket.Status)">@Model.Ticket.Status</span></dd> @* Usa helper actualizado *@
+
+        <dt class="col-sm-3">Urgencia</dt>
+        <dd class="col-sm-9">@Model.Ticket.Urgency</dd>
+
+        <dt class="col-sm-3">Importancia</dt>
+        <dd class="col-sm-9">@Model.Ticket.Importance</dd>
+
+        <dt class="col-sm-3">Creado por</dt>
+        <dd class="col-sm-9">@(Model.Ticket.CreatedByUserEmail ?? "N/A")</dd>
+
+         <dt class="col-sm-3">Fecha Creación</dt>
+        <dd class="col-sm-9">@Model.Ticket.CreatedAt.ToString("g")</dd>
+
+        <dt class="col-sm-3">Asignado a</dt>
+        <dd class="col-sm-9">@(Model.Ticket.AssignedToUserEmail ?? "Sin asignar")</dd>
+
+         <dt class="col-sm-3">Fecha Resolución</dt>
+        <dd class="col-sm-9">@(Model.Ticket.ResolvedAt.HasValue ? Model.Ticket.ResolvedAt.Value.ToString("g") : "--")</dd>
+
+        <dt class="col-sm-3">Última Actualización</dt>
+        <dd class="col-sm-9">@(Model.Ticket.LastUpdatedAt.HasValue ? Model.Ticket.LastUpdatedAt.Value.ToString("g") : "--")</dd>
+
+        <dt class="col-sm-3">Documentación Solución</dt>
+        <dd class="col-sm-9">
+             @if (!string.IsNullOrEmpty(Model.Ticket.SolutionDocumentation)) { <pre style="white-space: pre-wrap; font-family: inherit; margin: 0;">@Model.Ticket.SolutionDocumentation</pre> } else { <span>-- Aún no documentada --</span> }
+        </dd>
+    </dl>
+</div>
+
+<div class="mt-4">
+    @* El controlador Edit GET todavía pasa el modelo Ticket, así que este enlace funciona temporalmente *@
+    @* TODO: Actualizar Edit para usar ViewModel y luego este enlace pasará Model.Ticket.TicketId *@
+    <a asp-action="Edit" asp-route-id="@Model.Ticket.TicketId" class="btn btn-warning">Editar Ticket</a> |
+    <a asp-action="Index" class="btn btn-secondary">Volver a la Lista</a>
+</div>
+
+@* Helper function para obtener clase de badge de Bootstrap según el estado *@
+@functions {
+    string GetStatusBadgeClassFromString(string status)
+    {
+        // Intenta convertir el string de vuelta a enum para usar el switch
+        if(Enum.TryParse<TicketStatus>(status, true, out var statusEnum)) {
+             return statusEnum switch {
+                 TicketStatus.Creado => "bg-primary text-white", TicketStatus.Pendiente => "bg-info text-dark", TicketStatus.EnProgreso => "bg-warning text-dark",
+                 TicketStatus.Resuelto => "bg-success text-white", TicketStatus.Cerrado => "bg-secondary text-white", _ => "bg-light text-dark", };
+        }
+        return "bg-light text-dark"; // Default si el string no coincide con el enum
+    }
+}

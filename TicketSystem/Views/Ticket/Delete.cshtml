@@ -1,0 +1,56 @@
+﻿@* CAMBIO: Modelo es TicketDeleteViewModel *@
+@model TicketSystem.ViewModels.TicketDeleteViewModel
+@* Añadir using si ViewModels está en otro namespace que Models *@
+@using TicketSystem.ViewModels
+
+@{
+    ViewData["Title"] = "Eliminar Ticket #" + Model.TicketId; // Acceder via Model directo
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@* Muestra mensaje de error si viene del ViewModel *@
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        <strong>Error:</strong> @Model.ErrorMessage
+    </div>
+}
+
+<h3>¿Estás seguro de que quieres eliminar este ticket?</h3>
+<div>
+    <h4>Detalles del Ticket a Eliminar</h4>
+    <hr />
+    <dl class="row">
+        @* CAMBIO: Acceder a propiedades directamente desde el Model (TicketDeleteViewModel) *@
+        <dt class="col-sm-3">ID Ticket</dt>
+        <dd class="col-sm-9">@Model.TicketId</dd>
+
+        <dt class="col-sm-3">Asunto</dt>
+        <dd class="col-sm-9">@Model.Subject</dd>
+
+        <dt class="col-sm-3">Categoría</dt>
+        <dd class="col-sm-9">@Model.CategoryName</dd>
+
+        <dt class="col-sm-3">Estado</dt>
+        <dd class="col-sm-9">@Model.Status</dd>
+
+        <dt class="col-sm-3">Creado por</dt>
+        <dd class="col-sm-9">@(Model.CreatedByUserEmail ?? "N/A")</dd>
+
+        <dt class="col-sm-3">Fecha Creación</dt>
+        <dd class="col-sm-9">@Model.CreatedAt.ToString("g")</dd>
+
+        <dt class="col-sm-3">Asignado a</dt>
+        <dd class="col-sm-9">@(Model.AssignedToUserEmail ?? "Sin asignar")</dd>
+    </dl>
+
+    @* El formulario envía la confirmación a la acción DeleteConfirmed (POST) *@
+    <form asp-action="Delete" method="post">
+        @Html.AntiForgeryToken()
+        @* Enviar el ID del ticket a eliminar usando el ViewModel *@
+        <input type="hidden" asp-for="TicketId" />
+        <button type="submit" class="btn btn-danger">Eliminar</button> |
+        <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>

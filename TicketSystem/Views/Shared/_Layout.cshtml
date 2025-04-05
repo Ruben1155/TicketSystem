@@ -1,0 +1,72 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Sistema de Tickets</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/TicketSystem.styles.css" asp-append-version="true" />
+    @* Eliminado el padding-top del body que era para la navbar fija *@
+    @* <style>
+        body {
+            padding-top: 70px;
+        }
+    </style> *@
+</head>
+<body>
+    <header>
+        @* Navbar clara estándar con borde inferior y sombra *@
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-light border-bottom box-shadow mb-3">
+            @* Cambiado a navbar-light bg-light, quitado fixed-top *@
+            <div class="container-fluid">
+                @* Enlace principal sigue apuntando a Tickets *@
+                <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Ticket" asp-action="Index">
+                    @* Icono SVG simple de ticket (opcional) *@
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-2"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path><path d="M12 12v9"></path><path d="M8 17h8"></path></svg>
+                    Sistema Tickets
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        @* Elementos 'Home' y 'Privacy' ELIMINADOS *@
+
+                        @* Enlace a Tickets (si el usuario está autenticado) *@
+                        @if (User.Identity != null && User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Ticket" asp-action="Index">Tickets</a> @* Cambiado de vuelta a text-dark *@
+                            </li>
+                            @* Puedes añadir más enlaces aquí si es necesario *@
+                        }
+                    </ul>
+                    @* Incluye la vista parcial para Login/Register/Manage de Identity *@
+                    @* Con navbar clara, los estilos por defecto de _LoginPartial (text-dark) deberían verse bien *@
+                    <partial name="_LoginPartial" />
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container mt-4">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted mt-auto py-3 bg-light">
+        <div class="container text-center">
+            &copy; @DateTime.Now.Year - Sistema de Tickets
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

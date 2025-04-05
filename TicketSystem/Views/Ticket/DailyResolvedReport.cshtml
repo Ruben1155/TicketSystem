@@ -1,0 +1,54 @@
+﻿@model IEnumerable<TicketSystem.Models.Ticket>
+@using TicketSystem.Models;
+
+@{
+    ViewData["Title"] = "Tickets Resueltos Hoy";
+    var reportDate = ViewData["ReportDate"] ?? DateTime.UtcNow.ToString("D");
+}
+
+<h1>@ViewData["Title"]</h1>
+<p>Mostrando tickets resueltos en la fecha: @reportDate</p>
+
+@if (Model.Any())
+{
+    <div class="table-responsive shadow-sm">
+        <table class="table table-striped table-hover table-bordered table-sm align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>@Html.DisplayNameFor(model => model.TicketId)</th>
+                    <th>@Html.DisplayNameFor(model => model.Subject)</th>
+                    <th>@Html.DisplayNameFor(model => model.Category)</th>
+                    <th>@Html.DisplayNameFor(model => model.CreatedByUser)</th>
+                    <th>@Html.DisplayNameFor(model => model.ResolvedAt)</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@Html.DisplayFor(modelItem => item.TicketId)</td>
+                        <td>@Html.DisplayFor(modelItem => item.Subject)</td>
+                        <td>@(item.Category?.Name ?? "N/A")</td>
+                        <td>@(item.CreatedByUser?.Email ?? "N/A")</td>
+                        <td>@(item.ResolvedAt.HasValue ? item.ResolvedAt.Value.ToString("g") : "--")</td>
+                        <td class="text-center">
+                            <a asp-action="Details" asp-route-id="@item.TicketId" class="btn btn-info" title="Detalles"><i class="bi bi-info-circle me-1"></i>Detalles</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <div class="alert alert-info mt-3" role="alert">
+        No se resolvieron tickets en esta fecha.
+    </div>
+}
+
+<div class="mt-4">
+    <a asp-action="Index" class="btn btn-secondary">Volver a Mi Lista de Tickets</a>
+</div>
+
