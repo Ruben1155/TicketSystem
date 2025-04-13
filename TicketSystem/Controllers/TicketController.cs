@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 // using Microsoft.EntityFrameworkCore; // Ya no se necesita aquí
 using System.Threading.Tasks;
@@ -112,21 +112,18 @@ namespace TicketSystem.Controllers
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null) { return Challenge(); }
 
-            // Obtener DTO desde el servicio (valida permiso base para ver)
-            var ticketDto = await _ticketService.GetTicketByIdAsync(id.Value, currentUser);
-            if (ticketDto == null) { TempData["ErrorMessage"] = "Ticket no encontrado o no tiene permiso."; return RedirectToAction(nameof(Index)); }
+            // Obtener el Ticket completo desde el servicio (valida permiso base para ver)
+            var ticket = await _ticketService.GetTicketEntityByIdAsync(id.Value, currentUser);
+            if (ticket == null) { TempData["ErrorMessage"] = "Ticket no encontrado o no tiene permiso."; return RedirectToAction(nameof(Index)); }
 
-            // Mapear DTO a EditViewModel usando AutoMapper
-            // El perfil de mapeo se encarga de convertir los enums string a enums
-            // y copiar los IDs (CategoryId, AssignedToUserId) que añadimos al DTO.
-            var viewModel = _mapper.Map<TicketEditViewModel>(ticketDto); // <-- USA AUTOMAPPER
+            // Crear un nuevo TicketEditViewModel directamente con el objeto Ticket
+            var viewModel = new TicketEditViewModel(ticket);
 
             // Verificar permiso específico para editar (Analista asignado, Soporte creador, Admin)
-            // Usamos los IDs que ahora están en el DTO/ViewModel
+            // Usamos el objeto ticket para la validación
             bool isAdmin = currentUser.Role == UserRole.Admin;
-            // Asegurarse que AssignedToUserId (string?) se compara correctamente
-            bool isAssignee = !string.IsNullOrEmpty(viewModel.AssignedToUserId) && currentUser.Id == viewModel.AssignedToUserId;
-            bool isCreator = currentUser.Id == ticketDto.CreatedByUserId; // Usa ID del DTO original
+            bool isAssignee = !string.IsNullOrEmpty(ticket.AssignedToUserId) && currentUser.Id == ticket.AssignedToUserId;
+            bool isCreator = currentUser.Id == ticket.CreatedByUserId;
             bool canEdit = (isAssignee && currentUser.Role == UserRole.Analyst) ||
                            (isCreator && currentUser.Role == UserRole.Support) ||
                            isAdmin;

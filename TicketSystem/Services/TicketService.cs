@@ -1,4 +1,4 @@
-﻿using AutoMapper; // <-- AÑADIDO: Using para AutoMapper
+using AutoMapper; // <-- AÑADIDO: Using para AutoMapper
 using AutoMapper.QueryableExtensions; // <-- AÑADIDO: Using para .ProjectTo()
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -100,6 +100,31 @@ namespace TicketSystem.Services
             return _mapper.Map<TicketDto>(ticket); // <-- CAMBIO
         }
 
+        public async Task<Ticket> GetTicketEntityByIdAsync(int id, User currentUser)
+        {
+            _logger.LogInformation($"Usuario {currentUser.Email} buscando entidad de ticket ID {id}");
+
+            // Obtener la entidad Ticket con las relaciones necesarias
+            var ticket = await _context.Tickets
+                .Include(t => t.Category)
+                .Include(t => t.CreatedByUser)
+                .Include(t => t.AssignedToUser)
+                .FirstOrDefaultAsync(m => m.TicketId == id);
+
+            if (ticket == null)
+            {
+                _logger.LogWarning($"Ticket con ID {id} no encontrado.");
+                return null;
+            }
+
+            bool isAdmin = currentUser.Role == UserRole.Admin;
+            if (currentUser.Id != ticket.CreatedByUserId && currentUser.Id != ticket.AssignedToUserId && !isAdmin)
+            {
+                _logger.LogWarning($"Usuario {currentUser.Email} intentó acceder al ticket {id} sin permiso.");
+                return null;
+            }
+            return ticket;
+        }
         public async Task<(IEnumerable<SelectListItem> Categories, IEnumerable<SelectListItem> Analysts)> GetDropdownDataAsync()
         {
             // Sin cambios aquí
@@ -158,8 +183,13 @@ namespace TicketSystem.Services
 
                 // Asigna manualmente campos que no deben venir del mapeo o necesitan lógica
                 ticketToUpdate.LastUpdatedAt = DateTime.UtcNow;
-                if (ticketToUpdate.Status == TicketStatus.Resuelto && !ticketToUpdate.ResolvedAt.HasValue) { ticketToUpdate.ResolvedAt = DateTime.UtcNow; }
-                else if (ticketToUpdate.Status != TicketStatus.Resuelto) { ticketToUpdate.ResolvedAt = null; }
+                // Si el ticket se marca como Resuelto y ResolvedAt no tiene valor,
+                // asignamos la fecha y hora actual.
+                if (ticketToUpdate.Status == TicketStatus.Resuelto && !ticketToUpdate.ResolvedAt.HasValue) 
+                { ticketToUpdate.ResolvedAt = DateTime.UtcNow; }
+                // Si el ticket no está Resuelto, nos aseguramos que ResolvedAt sea null.
+                else if (ticketToUpdate.Status != TicketStatus.Resuelto) 
+                { ticketToUpdate.ResolvedAt = null; }
                 // CreatedByUserId es ignorado por el perfil de mapeo, no se cambiará
 
                 await _context.SaveChangesAsync();

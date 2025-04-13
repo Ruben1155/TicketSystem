@@ -1,10 +1,9 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 using TicketSystem.Models; // Para Enums
 
 namespace TicketSystem.ViewModels
 {
-    // ViewModel para el formulario de edición de tickets.
     public class TicketEditViewModel
     {
         [Required] // El ID es necesario para identificar el ticket a editar
@@ -54,25 +53,20 @@ namespace TicketSystem.ViewModels
         // Constructor sin parámetros necesario para Model Binding
         public TicketEditViewModel() { }
 
-        // Constructor para facilitar el mapeo desde TicketDto (usado en Edit GET)
-        public TicketEditViewModel(API.DTOs.TicketDto dto)
+        // Constructor que recibe un objeto Ticket y mapea sus propiedades.
+        public TicketEditViewModel(Ticket ticket)
         {
-            TicketId = dto.TicketId;
-            Subject = dto.Subject;
-            Description = dto.Description;
-            // Necesitamos los IDs para los selects, no los nombres/strings del DTO
-            // CategoryId = dto.CategoryId; // ¡TicketDto no tiene CategoryId! Se necesita cargar por separado o añadir al DTO/Servicio
-            // AssignedToUserId = dto.AssignedToUserId; // ¡TicketDto no tiene AssignedToUserId! Se necesita cargar por separado o añadir al DTO/Servicio
-            Enum.TryParse(dto.Urgency, out TicketUrgency urgencyEnum); Urgency = urgencyEnum;
-            Enum.TryParse(dto.Importance, out TicketImportance importanceEnum); Importance = importanceEnum;
-            Enum.TryParse(dto.Status, out TicketStatus statusEnum); Status = statusEnum;
-            SolutionDocumentation = dto.SolutionDocumentation;
-            CreatedByUserEmail = dto.CreatedByUserEmail;
-            CreatedAt = dto.CreatedAt;
-            // NOTA: Falta mapear CategoryId y AssignedToUserId aquí.
-            // La forma más simple es que GetTicketByIdAsync devuelva también los IDs necesarios,
-            // o añadir un método al servicio para obtener solo el Ticket entidad para edición.
-            // Por ahora, dejaremos estos sin mapear en este constructor y los asignaremos en la acción Edit GET.
+            TicketId = ticket.TicketId;
+            Subject = ticket.Subject;
+            Description = ticket.Description;
+            CategoryId = ticket.CategoryId;
+            AssignedToUserId = ticket.AssignedToUserId;
+            Urgency = ticket.Urgency;
+            Importance = ticket.Importance;
+            Status = ticket.Status;
+            SolutionDocumentation = ticket.SolutionDocumentation;
+            CreatedByUserEmail = ticket.CreatedByUser?.Email; // Accede a la propiedad de navegación CreatedByUser
+            CreatedAt = ticket.CreatedAt;
         }
     }
 }

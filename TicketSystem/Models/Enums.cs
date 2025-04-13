@@ -1,4 +1,4 @@
-﻿// Models/Enums.cs
+// Models/Enums.cs
 // Este archivo define las enumeraciones usadas en los modelos,
 // proporcionando nombres descriptivos para los códigos numéricos almacenados en la base de datos.
 
@@ -32,10 +32,11 @@ namespace TicketSystem.Models // Asegúrate que el namespace coincida con tu pro
     // Asegúrate que estos valores coincidan con tu lógica de negocio y la tabla Tickets
     public enum TicketStatus
     {
-        Creado = 1,
-        Pendiente = 2, // O Asignado
-        EnProgreso = 3,
-        Resuelto = 4,
-        Cerrado = 5 // Opcional, si necesitas un estado final después de resuelto
+        Creado = 1,     // Ticket Recién Creado
+        Pendiente = 2,  // Ticket sin asignar
+        Asignado = 3,   // Ticket asignado a un Analista
+        EnProgreso = 4, // Ticket en proceso de resolución
+        Resuelto = 5,   // Ticket resuelto
+        Cerrado = 6     // Opcional, si necesitas un estado final después de resuelto
     }
 }
